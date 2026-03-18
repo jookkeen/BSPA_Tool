@@ -112,11 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initGlobalSearch();
     loadFromLocalStorage();
+    initVersionDisplay();
     renderView('dashboard');
     initWidgetModal();
     updateTicker();
     updateNotificationCount();
 });
+
+function initVersionDisplay() {
+    const versionEl = document.getElementById('sidebar-version-text');
+    if (versionEl) {
+        versionEl.textContent = 'v' + state.version;
+    }
+}
+
 
 // --- Search ---
 function initGlobalSearch() {
