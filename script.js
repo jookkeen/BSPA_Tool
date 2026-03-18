@@ -1,11 +1,11 @@
 /**
- * BSPA Elektro Planungs-Tool Logic
+ * BSPA Elektro Planungs-Tool Logic v2.2.0
  */
 
 // --- Configuration & State ---
 const state = {
     currentView: 'dashboard',
-    activeWidgets: ['gemeinsam', 'privat', 'abteilung', 'info', 'jahresaufgaben', 'blockplaene'],
+    activeWidgets: ['gemeinsam', 'privat', 'abteilung', 'info', 'jahresaufgaben', 'blockplan'],
     checklists: {
         gemeinsam: [
             { id: 'g1', text: 'Sitzplan gemacht?', done: false },
@@ -36,47 +36,48 @@ const state = {
         { kw: 41, von: '06.10.25', bis: '10.10.25', tage: 5, klassen: 'EL 10 C, EI 10 D, EBT 13, Mech 13', notes: '' },
         { kw: 42, von: '13.10.25', bis: '17.10.25', tage: 5, klassen: 'EL 10 A, EBT 11 A, EBT 12 A, Mech 12', notes: '' },
         { kw: 43, von: '20.10.25', bis: '24.10.25', tage: 5, klassen: 'EL 10 B, EBT 11 B, EBT 12 B, Mech 11', notes: '' },
-        { kw: 44, von: '27.10.25', bis: '31.10.25', tage: 5, klassen: 'EL 10 C, EI 10 D, EBT 13, Mech 10', notes: '' },
+        { kw: 44, von: '27.10.25', bis: '31.10.25', tage: 5, klassen: 'EL 10 C, EI 10 D, EBT 13, Mech 10, EEG 11A', notes: '(EEG 11a Blockwoche!)' },
         { kw: 45, von: '03.11.25', bis: '07.11.25', tage: 0, klassen: '--- FERIEN ---', notes: 'Allerheiligenferien' },
         { kw: 46, von: '10.11.25', bis: '14.11.25', tage: 5, klassen: 'EL 10 A, EBT 11 A, EBT 12 A, Mech 12', notes: '' },
         { kw: 47, von: '17.11.25', bis: '21.11.25', tage: 4, klassen: 'EL 10 B, EBT 11 B, EBT 12 B', notes: '19.11. Buß- u. Bettag' },
+        { kw: 51, von: '15.12.25', bis: '19.12.25', tage: 5, klassen: 'EL 10 C, EI 10 D, EEG 11B', notes: '(EEG 11b Blockwoche!)' },
         { kw: 2, von: '05.01.26', bis: '09.01.26', tage: 3, klassen: '--- FEIERTAG ---, Mech 10', notes: '06.01. Hl. Drei Könige' },
         { kw: 3, von: '12.01.26', bis: '16.01.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 12', notes: '' },
         { kw: 4, von: '19.01.26', bis: '23.01.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 10', notes: '' },
-        { kw: 5, von: '26.01.26', bis: '30.01.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 11', notes: '' },
+        { kw: 5, von: '26.01.26', bis: '30.01.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 11', notes: '(EEG 11a Blockwoche!)' },
         { kw: 6, von: '02.02.26', bis: '06.02.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 12', notes: '' },
         { kw: 7, von: '09.02.26', bis: '13.02.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 10', notes: '' },
         { kw: 8, von: '16.02.26', bis: '20.02.26', tage: 0, klassen: '--- FERIEN ---', notes: 'Frühjahrsferien' },
-        { kw: 9, von: '23.02.26', bis: '27.02.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 11', notes: '' },
+        { kw: 9, von: '23.02.26', bis: '27.02.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 11', notes: '(EEG 11b Blockwoche!)' },
         { kw: 10, von: '02.03.26', bis: '06.03.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 12', notes: '' },
         { kw: 11, von: '09.03.26', bis: '13.03.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 11', notes: '' },
-        { kw: 12, von: '16.03.26', bis: '20.03.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: 'IHK-Prüfung Teil 1' },
+        { kw: 12, von: '16.03.26', bis: '20.03.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: 'IHK-Prüfung Teil 1, (EEG 11a Blockwoche!)' },
         { kw: 13, von: '23.03.26', bis: '27.03.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 12', notes: '' },
         { kw: 14, von: '30.03.26', bis: '03.04.26', tage: 0, klassen: '--- FERIEN ---', notes: 'Osterferien' },
         { kw: 15, von: '06.04.26', bis: '10.04.26', tage: 0, klassen: '--- FERIEN ---', notes: 'Osterferien' },
         { kw: 16, von: '13.04.26', bis: '17.04.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 12', notes: '' },
-        { kw: 17, von: '20.04.26', bis: '24.04.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: '' },
+        { kw: 17, von: '20.04.26', bis: '24.04.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: '(EEG 11b Blockwoche!)' },
         { kw: 18, von: '27.04.26', bis: '01.05.26', tage: 4, klassen: 'EL 10A, EBT 11A, EBT 12A, Mech 12', notes: '01.05. Tag der Arbeit' },
         { kw: 19, von: '04.05.26', bis: '08.05.26', tage: 5, klassen: 'EL 10B, EBT 11B, Mech 11', notes: 'IHK-Prüfung Teil 2' },
-        { kw: 20, von: '11.05.26', bis: '15.05.26', tage: 3, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: '14.05./15.05. Feier/Brückentag' },
+        { kw: 20, von: '11.05.26', bis: '15.05.26', tage: 3, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: '14.05./15.05. Feier/Brückentag, (EEG 11a Blockwoche!)' },
         { kw: 21, von: '18.05.26', bis: '22.05.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 11', notes: '' },
         { kw: 22, von: '25.05.26', bis: '29.05.26', tage: 0, klassen: '--- FERIEN ---', notes: 'Pfingstferien' },
         { kw: 23, von: '01.06.26', bis: '05.06.26', tage: 0, klassen: '--- FERIEN ---', notes: 'Pfingstferien' },
         { kw: 24, von: '08.06.26', bis: '12.06.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 11', notes: '' },
-        { kw: 25, von: '15.06.26', bis: '19.06.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: '' },
+        { kw: 25, von: '15.06.26', bis: '19.06.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: '(EEG 11b Blockwoche!)' },
         { kw: 26, von: '22.06.26', bis: '26.06.26', tage: 5, klassen: 'EL 10A, EBT 11A, EBT 12B, Mech 12', notes: '' },
         { kw: 27, von: '29.06.26', bis: '03.07.26', tage: 5, klassen: 'EL 10B, EBT 11B, EBT 12A, Mech 11', notes: '' },
-        { kw: 28, von: '06.07.26', bis: '10.07.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: '' },
+        { kw: 28, von: '06.07.26', bis: '10.07.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11A, Mech 10', notes: '(EEG 11a Blockwoche!)' },
         { kw: 29, von: '13.07.26', bis: '17.07.26', tage: 5, klassen: 'EL 10A, EBT 11B, EBT 12B, Mech 12', notes: '' },
         { kw: 30, von: '20.07.26', bis: '24.07.26', tage: 5, klassen: 'EL 10B, EBT 11A, EBT 12A, Mech 11', notes: '' },
-        { kw: 31, von: '27.07.26', bis: '31.07.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: 'Letzter Schultag' }
+        { kw: 31, von: '27.07.26', bis: '31.07.26', tage: 5, klassen: 'EL 10C, EI 10D, EEG 11B, Mech 10', notes: 'Letzter Schultag, (EEG 11b Blockwoche!)' }
     ],
     pdfFiles: [
-        { name: 'Elektro Block I', path: 'pläne/2025_26_Ele_Block_I.pdf' },
-        { name: 'Elektro Block II', path: 'pläne/2025_26_Ele_Block_II.pdf' },
-        { name: 'Elektro Block III', path: 'pläne/2025_26_Ele_Block_III.pdf' },
-        { name: 'Mechatroniker', path: 'pläne/2025_26_Ele_Block_Mech.pdf' },
-        { name: 'Teilzeit (HWK)', path: 'pläne/2025_26_Ele_Block_TZ_HWK.pdf' }
+        { name: 'Elektro Block I', path: 'plaene/2025_26_Ele_Block_I.pdf' },
+        { name: 'Elektro Block II', path: 'plaene/2025_26_Ele_Block_II.pdf' },
+        { name: 'Elektro Block III', path: 'plaene/2025_26_Ele_Block_III.pdf' },
+        { name: 'Mechatroniker', path: 'plaene/2025_26_Ele_Block_Mech.pdf' },
+        { name: 'Teilzeit (HWK)', path: 'plaene/2025_26_Ele_Block_TZ_HWK.pdf' }
     ],
     filterQuery: '',
     infoBoard: [
@@ -98,7 +99,11 @@ const state = {
         color: 'auto',
         fontSize: '0.85rem'
     },
-    version: '2.1.0-mobile'
+    version: '2.2.0',
+    timetable: {}, 
+    timetableEntries: [],
+    timetablePause: [2, 2, 2, 2, 2], // 2 = Break after 2nd Hour, 3 = Break after 3rd Hour
+    timetableColors: ['#1e88e5', '#43a047', '#fb8c00', '#e53935', '#8e24aa', '#3949ab', '#00acc1', '#c0ca33', '#795548', '#757575']
 };
 
 // --- Initialization ---
@@ -122,7 +127,7 @@ function initGlobalSearch() {
         const value = e.target.value;
         state.filterQuery = value;
         
-        if (state.currentView === 'blockplaene') {
+        if (state.currentView === 'blockplan') {
             renderBlockPlan(document.getElementById('view-container'));
         }
     });
@@ -139,7 +144,7 @@ function initNavigation() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const view = item.getAttribute('data-view');
-            switchView(view);
+            renderView(view);
             
             // Close sidebar on mobile after clicking
             if (window.innerWidth <= 768) {
@@ -171,17 +176,20 @@ function initNavigation() {
 
 function switchView(view) {
     state.currentView = view;
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.toggle('active', item.getAttribute('data-view') === view);
-    });
     renderView(view);
 }
 
 // --- Rendering Views ---
 function renderView(view) {
+    state.currentView = view;
     const container = document.getElementById('view-container');
     if (!container) return;
     container.innerHTML = '';
+
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach(nav => {
+        nav.classList.toggle('active', nav.getAttribute('data-view') === view);
+    });
 
     switch (view) {
         case 'dashboard': renderDashboard(container); break;
@@ -190,9 +198,12 @@ function renderView(view) {
         case 'abteilung': renderDeptArea(container); break;
         case 'info': renderInfoArea(container); break;
         case 'jahresaufgaben': renderAnnualTasks(container); break;
-        case 'blockplaene': renderBlockPlan(container); break;
+        case 'blockplan': renderBlockPlan(container); break;
+        case 'stundenplan': renderStundenplan(container); break;
         case 'settings': renderSettings(container); break;
         case 'ticker': renderTickerSetup(container); break;
+        default:
+            container.innerHTML = `<div class="p-4"><h2>${view}</h2><p>In Arbeit...</p></div>`;
     }
 }
 
@@ -254,11 +265,11 @@ function createWidget(id) {
             icon = 'fa-calendar-check';
             content = renderChecklistUI(state.checklists.jahresbeginn, 'jahresbeginn');
             break;
-        case 'blockplaene':
+        case 'blockplan':
             title = 'Aktueller Block';
             icon = 'fa-table';
             content = `<p>KW ${state.blockPlan[0].kw}: ${state.blockPlan[0].klassen}</p>
-                       <button class="btn btn-primary" style="margin-top: 10px; width: 100%" onclick="switchView('blockplaene')">Details</button>`;
+                       <button class="btn btn-primary" style="margin-top: 10px; width: 100%" onclick="switchView('blockplan')">Details</button>`;
             break;
     }
     
@@ -1137,6 +1148,10 @@ function loadFromLocalStorage() {
             state.tickerSettings = { ...state.tickerSettings, ...parsed.tickerSettings };
         }
         
+        if (parsed.timetable) state.timetable = parsed.timetable;
+        if (parsed.timetableEntries) state.timetableEntries = parsed.timetableEntries;
+        if (parsed.timetablePause) state.timetablePause = parsed.timetablePause;
+        
         applyUITheme();
     }
 }
@@ -1177,3 +1192,526 @@ window.cycleWidgetSize = (id) => {
     saveToLocalStorage();
     renderView('dashboard');
 };
+window.renderStundenplan = renderStundenplan;
+window.exportToWord = exportToWord;
+window.showAddTimetableEntryModal = showAddTimetableEntryModal;
+window.selectColor = selectColor;
+window.handleSidebarDragStart = handleSidebarDragStart;
+window.handleGridDragStart = handleGridDragStart;
+
+
+function renderStundenplan(container) {
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="stundenplan-container">
+            <div class="stundenplan-sidebar">
+                <div class="sidebar-header-sm">
+                    <h3>Einträge</h3>
+                    <button class="btn btn-primary btn-sm" onclick="showAddTimetableEntryModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="entry-list" id="sidebar-entry-list">
+                    <!-- Entries will be here -->
+                </div>
+                <div class="stundenplan-actions">
+                    <button class="btn btn-secondary" onclick="exportToWord()">
+                        <i class="fas fa-file-word"></i> Word Export
+                    </button>
+                    <div id="delete-zone" class="delete-zone">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stundenplan-main">
+                <div class="stundenplan-grid-header">
+                    <div class="grid-header-cell">Zeit</div>
+                    ${['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'].map((day, i) => `
+                        <div class="grid-header-cell">
+                            ${day}
+                            <div class="pause-selector">
+                                <span>Pause:</span>
+                                <label title="Pause nach 2. Stunde"><input type="radio" name="pause_${i}" value="2" ${state.timetablePause[i] === 2 ? 'checked' : ''} onchange="updatePause(${i}, 2)"> 2.</label>
+                                <label title="Pause nach 3. Stunde"><input type="radio" name="pause_${i}" value="3" ${state.timetablePause[i] === 3 ? 'checked' : ''} onchange="updatePause(${i}, 3)"> 3.</label>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="stundenplan-grid-body" id="timetable-grid-body">
+                    <!-- Grid rows will be here -->
+                </div>
+            </div>
+        </div>
+    `;
+
+    renderSidebarEntries();
+    renderTimetableGrid();
+    initGlobalTimetableDragAndDrop();
+}
+
+function renderSidebarEntries() {
+    const list = document.getElementById('sidebar-entry-list');
+    if (!list) return;
+
+    list.innerHTML = state.timetableEntries.map(entry => `
+        <div class="entry-item-sidebar" 
+             draggable="true" 
+             data-id="${entry.id}" 
+             ondragstart="handleSidebarDragStart(event, '${entry.id}')">
+            <div style="display: flex; align-items: center;">
+                <div class="entry-color-indicator" style="background-color: ${entry.color}"></div>
+                <span>${entry.klasse} - ${entry.fach}</span>
+            </div>
+            <div class="entry-controls-sidebar">
+                <i class="fas fa-edit" onclick="showAddTimetableEntryModal('${entry.id}')" title="Bearbeiten"></i>
+                <i class="fas fa-trash-alt" onclick="deleteSidebarEntry('${entry.id}')" title="Löschen"></i>
+                <i class="fas fa-grip-vertical"></i>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.deleteSidebarEntry = (id) => {
+    if (confirm('Diesen Eintrag wirklich aus der Liste löschen?')) {
+        state.timetableEntries = state.timetableEntries.filter(e => e.id !== id);
+        // Also remove from grid
+        Object.keys(state.timetable).forEach(key => {
+            if (state.timetable[key] === id) delete state.timetable[key];
+        });
+        saveToLocalStorage();
+        renderStundenplan(document.getElementById('view-container'));
+    }
+};
+
+const timeSlots = [
+    { start: '07:55', end: '08:40', num: 1 },
+    { start: '08:40', end: '09:25', num: 2 },
+    { start: '09:45', end: '10:30', num: 3 },
+    { start: '10:30', end: '11:15', num: 4 },
+    { start: '11:15', end: '12:00', num: 5 },
+    { start: '12:00', end: '12:45', num: 6 },
+    { start: '12:45', end: '13:30', num: 7 },
+    { start: '13:30', end: '14:15', num: 8 },
+    { start: '14:15', end: '15:00', num: 9 },
+    { start: '15:00', end: '15:45', num: 10 }
+];
+
+function renderTimetableGrid() {
+    const gridBody = document.getElementById('timetable-grid-body');
+    if (!gridBody) return;
+
+    gridBody.innerHTML = Array.from({ length: 10 }, (_, hourIndex) => {
+        return `
+            <div class="grid-row">
+                <div class="grid-time-cell multi-time">
+                    <span class="hour-num">${hourIndex + 1}</span>
+                </div>
+                ${[0, 1, 2, 3, 4].map(dayIndex => {
+                    const time = getTimeForCell(dayIndex, hourIndex);
+                    return `
+                        <div class="grid-cell" 
+                             data-day="${dayIndex}" 
+                             data-hour="${hourIndex}"
+                             id="cell_${dayIndex}_${hourIndex}">
+                             <div class="cell-time-small">${time.start}-${time.end}</div>
+                             ${renderGridEntry(dayIndex, hourIndex)}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }).join('');
+    
+    initGridDragAndDrop();
+}
+
+window.updatePause = (dayIndex, pauseAfter) => {
+    state.timetablePause[dayIndex] = pauseAfter;
+    saveToLocalStorage();
+    renderTimetableGrid();
+};
+
+function getTimeForCell(dayIndex, hourIndex) {
+    const pauseAfter = state.timetablePause[dayIndex] || 2;
+    const h = hourIndex + 1;
+    
+    if (h === 1) return { start: '07:55', end: '08:40' };
+    if (h === 2) return { start: '08:40', end: '09:25' };
+    
+    if (pauseAfter === 2) {
+        // Break after 2nd (09:25 - 09:45)
+        if (h === 3) return { start: '09:45', end: '10:30' };
+        if (h === 4) return { start: '10:30', end: '11:15' };
+    } else {
+        // Break after 3rd (10:10 - 10:30)
+        if (h === 3) return { start: '09:25', end: '10:10' };
+        if (h === 4) return { start: '10:30', end: '11:15' };
+    }
+    
+    // Default times for 5-10
+    const defaults = [
+        null, null, null, null,
+        { start: '11:15', end: '12:00' },
+        { start: '12:00', end: '12:45' },
+        { start: '12:45', end: '13:30' },
+        { start: '13:30', end: '14:15' },
+        { start: '14:15', end: '15:00' },
+        { start: '15:00', end: '15:45' }
+    ];
+    return defaults[hourIndex];
+}
+
+
+// --- Drag and Drop Logic ---
+
+function handleSidebarDragStart(e, entryId) {
+    e.dataTransfer.setData('type', 'sidebar');
+    e.dataTransfer.setData('entryId', entryId);
+}
+
+function handleGridDragStart(e, key, entryId) {
+    e.dataTransfer.setData('type', 'grid');
+    e.dataTransfer.setData('sourceKey', key);
+    e.dataTransfer.setData('entryId', entryId);
+}
+
+function renderGridEntry(day, hour) {
+    const key = `${day}_${hour}`;
+    const entryId = state.timetable[key];
+    if (!entryId) return '';
+
+    const entry = state.timetableEntries.find(e => e.id === entryId);
+    if (!entry) return '';
+
+    return `
+        <div class="timetable-entry" 
+             draggable="true"
+             style="background-color: ${entry.color}"
+             ondragstart="handleGridDragStart(event, '${key}', '${entry.id}')"
+             ondblclick="handleGridEntryDblClick(event, '${key}')"
+             title="Doppelklick zum Löschen">
+            <div class="entry-klasse">${entry.klasse}</div>
+            <div class="entry-fach">${entry.fach}</div>
+            <div class="entry-zimmer">${entry.zimmer}</div>
+        </div>
+    `;
+}
+
+window.handleGridEntryDblClick = (e, key) => {
+    delete state.timetable[key];
+    saveToLocalStorage();
+    renderTimetableGrid();
+};
+
+
+
+function initGridDragAndDrop() {
+    const cells = document.querySelectorAll('.grid-cell');
+    cells.forEach(cell => {
+        cell.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            cell.classList.add('drag-over');
+        });
+
+        cell.addEventListener('dragleave', () => {
+            cell.classList.remove('drag-over');
+        });
+
+        cell.addEventListener('drop', (e) => {
+            e.preventDefault();
+            cell.classList.remove('drag-over');
+            
+            const targetCell = e.target.closest('.grid-cell');
+            if (!targetCell) return;
+
+            const type = e.dataTransfer.getData('type');
+            const entryId = e.dataTransfer.getData('entryId');
+            const day = targetCell.getAttribute('data-day');
+            const hour = targetCell.getAttribute('data-hour');
+            const targetKey = `${day}_${hour}`;
+
+            if (type === 'grid') {
+                const sourceKey = e.dataTransfer.getData('sourceKey');
+                if (sourceKey === targetKey) return;
+                delete state.timetable[sourceKey];
+            }
+
+            state.timetable[targetKey] = entryId;
+            saveToLocalStorage();
+            renderTimetableGrid();
+        });
+    });
+}
+
+function initGlobalTimetableDragAndDrop() {
+    const deleteZone = document.getElementById('delete-zone');
+    if (deleteZone) {
+        deleteZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            deleteZone.style.transform = 'scale(1.2)';
+            deleteZone.classList.add('drag-active');
+        });
+
+        deleteZone.addEventListener('dragleave', () => {
+            deleteZone.style.transform = 'scale(1)';
+            deleteZone.classList.remove('drag-active');
+        });
+
+        deleteZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            deleteZone.style.transform = 'scale(1)';
+            deleteZone.classList.remove('drag-active');
+            
+            const type = e.dataTransfer.getData('type');
+            if (type === 'grid') {
+                const sourceKey = e.dataTransfer.getData('sourceKey');
+                delete state.timetable[sourceKey];
+                saveToLocalStorage();
+                renderTimetableGrid();
+            }
+        });
+    }
+}
+
+// --- Modal for Adding Entries ---
+
+function showAddTimetableEntryModal(editId = null) {
+    // We'll reuse the existing modal structure but with different content
+    const modal = document.getElementById('widget-modal');
+    const title = document.getElementById('modal-title');
+    const body = document.querySelector('.modal-body');
+    const tabs = document.getElementById('modal-view-toggle');
+
+    const entryToEdit = editId ? state.timetableEntries.find(e => e.id === editId) : null;
+
+    title.innerText = entryToEdit ? 'Eintrag bearbeiten' : 'Stundenplan-Eintrag erstellen';
+    tabs.style.display = 'none'; // Hide tabs
+    
+    body.innerHTML = `
+        <form id="timetable-entry-form" class="timetable-modal">
+            <div class="form-group">
+                <label>Klasse</label>
+                <input type="text" id="entry-klasse" placeholder="z.B. EEG 11A" value="${entryToEdit ? entryToEdit.klasse : ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Fach</label>
+                <input type="text" id="entry-fach" placeholder="z.B. Anlagentechnik" value="${entryToEdit ? entryToEdit.fach : ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Zimmer</label>
+                <input type="text" id="entry-zimmer" placeholder="z.B. O205" value="${entryToEdit ? entryToEdit.zimmer || '' : ''}">
+            </div>
+            <div class="form-group">
+                <label>Farbe</label>
+                <div class="color-picker-grid" id="color-picker">
+                    ${state.timetableColors.map((color, i) => `
+                        <div class="color-option ${(entryToEdit ? entryToEdit.color === color : i === 0) ? 'active' : ''}" 
+                             style="background-color: ${color}" 
+                             data-color="${color}"
+                             onclick="selectColor(this)">
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                ${entryToEdit ? 'Aktualisieren' : 'Speichern'}
+            </button>
+        </form>
+    `;
+
+    modal.style.display = 'block';
+
+    document.getElementById('timetable-entry-form').onsubmit = (e) => {
+        e.preventDefault();
+        const activeColor = document.querySelector('.color-option.active').getAttribute('data-color');
+        
+        if (entryToEdit) {
+            entryToEdit.klasse = document.getElementById('entry-klasse').value;
+            entryToEdit.fach = document.getElementById('entry-fach').value;
+            entryToEdit.zimmer = document.getElementById('entry-zimmer').value;
+            entryToEdit.color = activeColor;
+        } else {
+            const newEntry = {
+                id: 'te_' + Date.now(),
+                klasse: document.getElementById('entry-klasse').value,
+                fach: document.getElementById('entry-fach').value,
+                zimmer: document.getElementById('entry-zimmer').value,
+                color: activeColor
+            };
+            state.timetableEntries.push(newEntry);
+        }
+        
+        saveToLocalStorage();
+        renderStundenplan(document.getElementById('view-container'));
+        modal.style.display = 'none';
+        // Reset modal state for future use
+        tabs.style.display = 'flex';
+    };
+}
+
+function selectColor(el) {
+    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
+}
+
+// --- Export Logic ---
+
+async function exportToWord() {
+    try {
+        if (typeof PizZip === 'undefined') {
+            alert("Die Export-Bibliothek (PizZip) konnte nicht geladen werden. Bitte stellen Sie sicher, dass Sie eine Internetverbindung haben oder laden Sie die Seite neu.");
+            return;
+        }
+        console.log("Starting export with bulletproof fallback...");
+
+        function base64ToBuffer(base) {
+            const binary = window.atob(base);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        }
+
+        let content;
+        try {
+            const response = await fetch('plaene/StundenplanLeer.docx');
+            if (!response.ok) throw new Error("Fetch failed");
+            content = await response.arrayBuffer();
+        } catch (e) {
+            console.warn("Fetch failed, using embedded template", e);
+            content = base64ToBuffer(TEMPLATE_BASE64);
+        }
+        
+        const zip = new PizZip(content);
+        
+        // Load the document.xml
+        let docXml = zip.file("word/document.xml").asText();
+        
+        // Create a mapping of placeholders we'll use
+        // We will look for cell markers or just replace based on grid positions if possible.
+        // Actually, since I know the XML structure from previous research, 
+        // I can target the cells in the second table.
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(docXml, "text/xml");
+        const tables = xmlDoc.getElementsByTagName("w:tbl");
+        const mainTable = tables[1]; // The timetable table
+        
+        if (!mainTable) throw new Error("Could not find timetable table in document.");
+        
+        const rows = mainTable.getElementsByTagName("w:tr");
+        
+        // Row 0 is header "Zeit", "Montag"...
+        // Row 1 is subheader "von-bis", "Fach", "Klasse", "Zi.Nr"...
+        // Row 2 is Hour 1
+        // Row 3 is Hour 2 ... and so on
+        
+        for (let hourIdx = 0; hourIdx < 10; hourIdx++) {
+            const rowIdx = hourIdx + 2;
+            const row = rows[rowIdx];
+            if (!row) continue;
+            
+            const cells = row.getElementsByTagName("w:tc");
+            
+            // Cell 0 is Time
+            // Cell 1 is Hour Number
+            // Cell 2-4 is Montag (Fach, Klasse, Zimmer)
+            // Cell 5-7 is Dienstag
+            // etc.
+            
+            for (let dayIdx = 0; dayIdx < 5; dayIdx++) {
+                const times = getTimeForCell(dayIdx, hourIdx);
+                const entryId = state.timetable[`${dayIdx}_${hourIdx}`];
+                
+                // Update Time in the word document if it exists in the row (Cell 0)
+                // But wait, the Word template has ONE time column for all.
+                // If the user wants day-specific breaks, I have to explain that 
+                // the Word template might need manual adjustment or I can try to 
+                // put the time INTO the Fach/Klasse cells if desired.
+                // For now, I will just populate the entries.
+
+                if (!entryId) continue;
+                
+                const entry = state.timetableEntries.find(e => e.id === entryId);
+                if (!entry) continue;
+                
+                // Index mapping:
+                // Mo: Fach=2, Klasse=3, Zi=4
+                // Di: Fach=5, Klasse=6, Zi=7
+                const baseIdx = 2 + (dayIdx * 3);
+                
+                updateCellText(cells[baseIdx], entry.fach);
+                updateCellText(cells[baseIdx+1], entry.klasse);
+                updateCellText(cells[baseIdx+2], entry.zimmer);
+
+                // Try to set color
+                setCellColor(cells[baseIdx], entry.color);
+                setCellColor(cells[baseIdx+1], entry.color);
+                setCellColor(cells[baseIdx+2], entry.color);
+            }
+        }
+        
+        // Serialize back
+        const serializer = new XMLSerializer();
+        const newXml = serializer.serializeToString(xmlDoc);
+        zip.file("word/document.xml", newXml);
+        
+        const out = zip.generate({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+        
+        saveAs(out, "Mein_Stundenplan.docx");
+        console.log("Export complete!");
+        
+    } catch (error) {
+        console.error("Export failed:", error);
+        alert("Export fehlgeschlagen: " + error.message);
+    }
+}
+
+function updateCellText(cell, text) {
+    if (!cell) return;
+    const paragraphs = cell.getElementsByTagName("w:p");
+    if (paragraphs.length === 0) return;
+    
+    const p = paragraphs[0];
+    let r = p.getElementsByTagName("w:r")[0];
+    
+    if (!r) {
+        r = p.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:r");
+        p.appendChild(r);
+    }
+    
+    let t = r.getElementsByTagName("w:t")[0];
+    if (!t) {
+        t = p.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:t");
+        r.appendChild(t);
+    }
+    
+    t.textContent = text || "";
+}
+
+function setCellColor(cell, hexColor) {
+    if (!cell) return;
+    let tcPr = cell.getElementsByTagName("w:tcPr")[0];
+    if (!tcPr) {
+        tcPr = cell.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:tcPr");
+        cell.insertBefore(tcPr, cell.firstChild);
+    }
+    
+    let shd = tcPr.getElementsByTagName("w:shd")[0];
+    if (!shd) {
+        shd = cell.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:shd");
+        tcPr.appendChild(shd);
+    }
+    
+    shd.setAttribute("w:val", "clear");
+    shd.setAttribute("w:fill", hexColor.replace('#', ''));
+    
+    // Crucial fix: Remove theme attributes that would override our manual color
+    shd.removeAttribute("w:themeFill");
+    shd.removeAttribute("w:themeColor");
+    shd.removeAttribute("w:themeFillTint");
+    shd.removeAttribute("w:themeFillShade");
+}

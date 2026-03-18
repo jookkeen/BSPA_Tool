@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSPA Elektro - Planungs-Tool</title>
+    <title>BSPA Elektro - Planungs-Tool v2.2.0</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.1/dist/pizzip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.47.0/build/docxtemplater.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="template_data.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -44,9 +48,17 @@
                     <i class="fas fa-calendar-check"></i>
                     <span>Jahresaufgaben</span>
                 </a>
-                <a href="#blockplaene" class="nav-item" data-view="blockplaene">
-                    <i class="fas fa-table"></i>
+                <a href="#blockplan" class="nav-item" data-view="blockplan">
+                    <i class="fas fa-calendar-alt"></i>
                     <span>Blockpläne</span>
+                </a>
+                <a href="#stundenplan" class="nav-item" data-view="stundenplan">
+                    <i class="fas fa-clock"></i>
+                    <span>Stundenplan</span>
+                </a>
+                <a href="#notizen" class="nav-item" data-view="notizen">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>Notizen</span>
                 </a>
                 <a href="#settings" class="nav-item" data-view="settings">
                     <i class="fas fa-cog"></i>
