@@ -97,7 +97,8 @@ const state = {
         speed: 30,
         color: 'auto',
         fontSize: '0.85rem'
-    }
+    },
+    version: '2.1.0-mobile'
 };
 
 // --- Initialization ---
