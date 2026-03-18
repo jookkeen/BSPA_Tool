@@ -743,6 +743,10 @@ th {
     background: rgba(0, 122, 255, 0.05);
 }
 
+.mobile-only {
+    display: none;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
@@ -760,22 +764,125 @@ th {
 }
 
 @media (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+
     .app-container {
         flex-direction: column;
     }
+
+    /* Off-canvas sidebar on mobile */
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
+        width: 260px;
+        height: 100vh;
+        position: fixed;
+        left: -260px;
+        top: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
     }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .sidebar .logo span, .sidebar .nav-item span, .sidebar .user-info {
+        display: flex;
+    }
+
     .main-content {
         margin-left: 0;
+        padding: 1rem;
+        height: auto;
+        overflow: visible;
     }
+
+    .view-container {
+        overflow: visible;
+    }
+
+    .top-bar {
+        padding: 0.5rem 0;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 100%;
+        order: 2;
+    }
+
+    .top-actions {
+        width: 100%;
+        justify-content: space-between;
+        order: 1;
+        gap: 0.5rem;
+    }
+
+    .ticker-box {
+        margin: 0;
+        height: 35px;
+        flex: 1;
+    }
+
+    #add-widget-btn span {
+        display: none;
+    }
+
+    #add-widget-btn {
+        padding: 0.75rem;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
+
+    .w-span-2, .w-span-3 {
+        grid-column: span 1 !important;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+        padding: 1.5rem;
+    }
+
+    .type-selector {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table scrolling on small screens */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 600px; /* Force scroll */
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 900;
+}
+
+.sidebar-overlay.active {
+    display: block;
 }
 /* Settings View */
 .settings-grid {

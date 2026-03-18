@@ -10,6 +10,7 @@
 </head>
 <body class="dark-theme">
     <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -73,6 +74,9 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-bar">
+                <button id="mobile-menu-toggle" class="btn-icon mobile-only">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" id="global-search" placeholder="Suche nach Aufgaben, Klassen...">
