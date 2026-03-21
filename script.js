@@ -100,6 +100,14 @@ const state = {
         fontSize: '0.85rem'
     },
     version: '2.2.0',
+    personalData: JSON.parse(localStorage.getItem('bspa_personal_data')) || {
+        name: 'Ricardo Leber', schuljahr: '2024/25', woche: '24. September 2024', schule: 'Staatliche Berufsschule I',
+        dienstbezeichnung: 'StR', geburtsdatum: '01.01.1985', fachrichtung: 'Informationstechnik', zweitfach: 'Mathematik',
+        privatanschrift: 'Musterstraße 1, 12345 Musterstadt', telefon: '0123/4567890', klassleitung: 'FI 11A (24 Schüler)', besonderheiten: 'Keine',
+        max_std_tag: '8', max_tage_jahr: '38', stunden_summe: '24', max_wochen_jahr: '38',
+        upz: '24', teilzeit_reduziert: '--', stundenreduzierung_grund: '--', azk_uebertrag: '0',
+        azk_abbau: '--', unterricht_haltend: '24'
+    },
     timetable: {}, 
     timetableEntries: [],
     timetablePause: [2, 2, 2, 2, 2], // 2 = Break after 2nd Hour, 3 = Break after 3rd Hour
@@ -1160,6 +1168,7 @@ function loadFromLocalStorage() {
         if (parsed.timetable) state.timetable = parsed.timetable;
         if (parsed.timetableEntries) state.timetableEntries = parsed.timetableEntries;
         if (parsed.timetablePause) state.timetablePause = parsed.timetablePause;
+        if (parsed.personalData) state.personalData = { ...state.personalData, ...parsed.personalData };
         
         applyUITheme();
     }
@@ -1228,9 +1237,9 @@ function renderStundenplan(container) {
                     <button class="btn btn-secondary" onclick="exportToWord()">
                         <i class="fas fa-file-word"></i> Word Export
                     </button>
-                    <div id="delete-zone" class="delete-zone">
-                        <i class="fas fa-trash"></i>
-                    </div>
+                    <button class="btn btn-outline" onclick="showPersonalFilesModal()">
+                        <i class="fas fa-user-edit"></i> Persönliche Dateien
+                    </button>
                 </div>
             </div>
             <div class="stundenplan-main">
@@ -1401,8 +1410,8 @@ function renderGridEntry(day, hour) {
              ondblclick="handleGridEntryDblClick(event, '${key}')"
              title="Doppelklick zum Löschen">
             <div class="entry-klasse">${entry.klasse}</div>
-            <div class="entry-fach">${entry.fach}</div>
-            <div class="entry-zimmer">${entry.zimmer}</div>
+            <div class="entry-fach">${entry.isSplit ? '1/2 ' : ''}${entry.fach}${entry.isSplit ? `<br><span style="font-size:0.65rem; font-weight:700;">${entry.partnerName}</span>` : ''}</div>
+            <div class="entry-zimmer">${entry.zimmer}${entry.isSplit ? `<br><span style="font-size:0.65rem;">${entry.partnerRoom}</span>` : ''}</div>
         </div>
     `;
 }
@@ -1511,6 +1520,23 @@ function showAddTimetableEntryModal(editId = null) {
                 <label>Zimmer</label>
                 <input type="text" id="entry-zimmer" placeholder="z.B. O205" value="${entryToEdit ? entryToEdit.zimmer || '' : ''}">
             </div>
+            
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 5px;">
+                <input type="checkbox" id="entry-is-split" ${entryToEdit && entryToEdit.isSplit ? 'checked' : ''} style="width: auto;">
+                <label for="entry-is-split" style="margin: 0; cursor: pointer;">Geteilte Stunde?</label>
+            </div>
+
+            <div id="split-fields" style="display: ${entryToEdit && entryToEdit.isSplit ? 'block' : 'none'}; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>Partner (4 Buchstaben)</label>
+                    <input type="text" id="entry-partner-name" maxlength="4" placeholder="z.B. StJo" value="${entryToEdit ? entryToEdit.partnerName || '' : ''}">
+                </div>
+                <div class="form-group">
+                    <label>Partner-Raum</label>
+                    <input type="text" id="entry-partner-room" placeholder="z.B. E302" value="${entryToEdit ? entryToEdit.partnerRoom || '' : ''}">
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Farbe</label>
                 <div class="color-picker-grid" id="color-picker">
@@ -1531,22 +1557,33 @@ function showAddTimetableEntryModal(editId = null) {
 
     modal.style.display = 'block';
 
+    const splitCheckbox = document.getElementById('entry-is-split');
+    const splitFields = document.getElementById('split-fields');
+    splitCheckbox.addEventListener('change', () => {
+        splitFields.style.display = splitCheckbox.checked ? 'block' : 'none';
+    });
+
     document.getElementById('timetable-entry-form').onsubmit = (e) => {
         e.preventDefault();
         const activeColor = document.querySelector('.color-option.active').getAttribute('data-color');
+        const isSplit = document.getElementById('entry-is-split').checked;
         
+        const entryData = {
+            klasse: document.getElementById('entry-klasse').value,
+            fach: document.getElementById('entry-fach').value,
+            zimmer: document.getElementById('entry-zimmer').value,
+            color: activeColor,
+            isSplit: isSplit,
+            partnerName: isSplit ? document.getElementById('entry-partner-name').value : '',
+            partnerRoom: isSplit ? document.getElementById('entry-partner-room').value : ''
+        };
+
         if (entryToEdit) {
-            entryToEdit.klasse = document.getElementById('entry-klasse').value;
-            entryToEdit.fach = document.getElementById('entry-fach').value;
-            entryToEdit.zimmer = document.getElementById('entry-zimmer').value;
-            entryToEdit.color = activeColor;
+            Object.assign(entryToEdit, entryData);
         } else {
             const newEntry = {
                 id: 'te_' + Date.now(),
-                klasse: document.getElementById('entry-klasse').value,
-                fach: document.getElementById('entry-fach').value,
-                zimmer: document.getElementById('entry-zimmer').value,
-                color: activeColor
+                ...entryData
             };
             state.timetableEntries.push(newEntry);
         }
@@ -1556,6 +1593,156 @@ function showAddTimetableEntryModal(editId = null) {
         modal.style.display = 'none';
         // Reset modal state for future use
         tabs.style.display = 'flex';
+    };
+}
+
+window.showPersonalFilesModal = showPersonalFilesModal;
+
+function showPersonalFilesModal() {
+    const modal = document.getElementById('widget-modal');
+    const title = document.getElementById('modal-title');
+    const body = document.querySelector('.modal-body');
+    const tabs = document.getElementById('modal-view-toggle');
+
+    title.innerText = 'Persönliche Dateien / Vorlage Kopf';
+    tabs.style.display = 'none';
+    
+    body.innerHTML = `
+        <form id="personal-data-form" class="timetable-modal" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-height: 70vh; overflow-y: auto; padding: 1rem;">
+            <div style="grid-column: span 2; font-weight: bold; border-bottom: 1px solid var(--border-color); margin-bottom: 0.5rem;">Allgemeine Informationen</div>
+            <div class="form-group">
+                <label>Lehrkraft Name</label>
+                <input type="text" id="pd-name" value="${state.personalData.name || ''}" placeholder="z.B. Ricardo Leber">
+            </div>
+            <div class="form-group">
+                <label>Dienstbezeichnung</label>
+                <input type="text" id="pd-dienst" value="${state.personalData.dienstbezeichnung || ''}" placeholder="z.B. StR">
+            </div>
+            <div class="form-group">
+                <label>Geburtsdatum</label>
+                <input type="text" id="pd-geburt" value="${state.personalData.geburtsdatum || ''}" placeholder="z.B. 24.10.84">
+            </div>
+            <div class="form-group">
+                <label>Schuljahr</label>
+                <input type="text" id="pd-schuljahr" value="${state.personalData.schuljahr || ''}" placeholder="z.B. 2024/25">
+            </div>
+            <div class="form-group">
+                <label>Gültig ab (Datum)</label>
+                <input type="text" id="pd-woche" value="${state.personalData.woche || ''}" placeholder="z.B. 24. September 2024">
+            </div>
+            <div class="form-group">
+                <label>Schule</label>
+                <input type="text" id="pd-schule" value="${state.personalData.schule || ''}" placeholder="z.B. Karl-Peter-Obermaier-Schule">
+            </div>
+
+            <div style="grid-column: span 2; font-weight: bold; border-bottom: 1px solid var(--border-color); margin-top: 1rem; margin-bottom: 0.5rem;">Anschrift & Fachrichtung</div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Berufliche Fachrichtung</label>
+                <input type="text" id="pd-fachrichtung" value="${state.personalData.fachrichtung || ''}">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Zweitfach / Zusatzprüfung</label>
+                <input type="text" id="pd-zweitfach" value="${state.personalData.zweitfach || ''}">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Privatanschrift</label>
+                <input type="text" id="pd-anschrift" value="${state.personalData.privatanschrift || ''}">
+            </div>
+            <div class="form-group">
+                <label>Telefon</label>
+                <input type="text" id="pd-telefon" value="${state.personalData.telefon || ''}">
+            </div>
+
+            <div style="grid-column: span 2; font-weight: bold; border-bottom: 1px solid var(--border-color); margin-top: 1rem; margin-bottom: 0.5rem;">Unterricht & Klassleitung</div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Klassleitungen & Schülerzahl</label>
+                <textarea id="pd-klassleitung" style="width:100%; min-height:60px; padding:0.75rem; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary); font-family:inherit;">${state.personalData.klassleitung || ''}</textarea>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Besonderheiten</label>
+                <textarea id="pd-besonderheiten" style="width:100%; min-height:60px; padding:0.75rem; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary); font-family:inherit;">${state.personalData.besonderheiten || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Max. Std / Tag</label>
+                <input type="text" id="pd-max-std-tag" value="${state.personalData.max_std_tag || ''}">
+            </div>
+            <div class="form-group">
+                <label>an ... Unterrichtstagen (Jahr)</label>
+                <input type="text" id="pd-max-tage-jahr" value="${state.personalData.max_tage_jahr || ''}">
+            </div>
+            <div class="form-group">
+                <label>Max. Std / Woche</label>
+                <input type="text" id="pd-stunden" value="${state.personalData.stunden_summe || ''}">
+            </div>
+            <div class="form-group">
+                <label>in ... Wochen (Jahr)</label>
+                <input type="text" id="pd-max-wochen-jahr" value="${state.personalData.max_wochen_jahr || ''}">
+            </div>
+
+            <div style="grid-column: span 2; font-weight: bold; border-bottom: 1px solid var(--border-color); margin-top: 1rem; margin-bottom: 0.5rem;">Pflichtstundenmaß & AZK</div>
+            <div class="form-group">
+                <label>UPZ (Pflichtstunden)</label>
+                <input type="text" id="pd-upz" value="${state.personalData.upz || ''}">
+            </div>
+            <div class="form-group">
+                <label>Reduziert auf</label>
+                <input type="text" id="pd-teilzeit-reduziert" value="${state.personalData.teilzeit_reduziert || ''}">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Grund für Reduzierung</label>
+                <input type="text" id="pd-stundenreduzierung-grund" value="${state.personalData.stundenreduzierung_grund || ''}">
+            </div>
+            <div class="form-group">
+                <label>AZK Übertrag</label>
+                <input type="text" id="pd-azk-uebertrag" value="${state.personalData.azk_uebertrag || ''}">
+            </div>
+            <div class="form-group">
+                <label>Geplanter Abbau AZK</label>
+                <input type="text" id="pd-azk-abbau" value="${state.personalData.azk_abbau || ''}">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>zu haltender Unterricht</label>
+                <input type="text" id="pd-unterricht-haltend" value="${state.personalData.unterricht_haltend || ''}">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="grid-column: span 2; justify-content: center; margin-top: 1rem;">
+                Speichern
+            </button>
+        </form>
+    `;
+
+    modal.style.display = 'block';
+
+    document.getElementById('personal-data-form').onsubmit = (e) => {
+        e.preventDefault();
+        state.personalData.name = document.getElementById('pd-name').value;
+        state.personalData.dienstbezeichnung = document.getElementById('pd-dienst').value;
+        state.personalData.geburtsdatum = document.getElementById('pd-geburt').value;
+        state.personalData.schuljahr = document.getElementById('pd-schuljahr').value;
+        state.personalData.woche = document.getElementById('pd-woche').value;
+        state.personalData.schule = document.getElementById('pd-schule').value;
+        state.personalData.fachrichtung = document.getElementById('pd-fachrichtung').value;
+        state.personalData.zweitfach = document.getElementById('pd-zweitfach').value;
+        state.personalData.privatanschrift = document.getElementById('pd-anschrift').value;
+        state.personalData.telefon = document.getElementById('pd-telefon').value;
+        state.personalData.klassleitung = document.getElementById('pd-klassleitung').value;
+        state.personalData.besonderheiten = document.getElementById('pd-besonderheiten').value;
+        state.personalData.max_std_tag = document.getElementById('pd-max-std-tag').value;
+        state.personalData.max_tage_jahr = document.getElementById('pd-max-tage-jahr').value;
+        state.personalData.stunden_summe = document.getElementById('pd-stunden').value;
+        state.personalData.max_wochen_jahr = document.getElementById('pd-max-wochen-jahr').value;
+        state.personalData.upz = document.getElementById('pd-upz').value;
+        state.personalData.teilzeit_reduziert = document.getElementById('pd-teilzeit-reduziert').value;
+        state.personalData.stundenreduzierung_grund = document.getElementById('pd-stundenreduzierung-grund').value;
+        state.personalData.azk_uebertrag = document.getElementById('pd-azk-uebertrag').value;
+        state.personalData.azk_abbau = document.getElementById('pd-azk-abbau').value;
+        state.personalData.unterricht_haltend = document.getElementById('pd-unterricht-haltend').value;
+        
+        saveToLocalStorage();
+        modal.style.display = 'none';
+        tabs.style.display = 'flex';
+        renderStundenplan(document.getElementById('view-container'));
     };
 }
 
@@ -1604,16 +1791,115 @@ async function exportToWord() {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(docXml, "text/xml");
         const tables = xmlDoc.getElementsByTagName("w:tbl");
+        const headerTable = tables[0];
         const mainTable = tables[1]; // The timetable table
         
+        // --- Fill Header / Personal Data ---
+        if (headerTable) {
+            const hRows = headerTable.getElementsByTagName("w:tr");
+            
+            // Typical layout in Table 0:
+            // Labels in Row 1, Values in Row 2 (Name, Dienst, Geburtstag)
+            // Labels in Row 3, Values in Row 4 (Fachrichtung, Zweitfach)
+            // Labels in Row 5, Values in Row 6 (Anschrift, Telefon)
+            
+            const fillBelowLabel = (searchPattern, value) => {
+                for (let r = 0; r < hRows.length; r++) {
+                    const hCells = hRows[r].getElementsByTagName("w:tc");
+                    for (let c = 0; c < hCells.length; c++) {
+                        const cellText = hCells[c].textContent || "";
+                        if (cellText.includes(searchPattern)) {
+                            // Found label. Fill cell directly below if it exists.
+                            if (r + 1 < hRows.length) {
+                                const targetRow = hRows[r+1];
+                                const targetCells = targetRow.getElementsByTagName("w:tc");
+                                // Tables often use gridSpan. We should aim for correct visual col.
+                                // But usually indices match up if they aren't too crazy.
+                                if (targetCells[c]) updateCellText(targetCells[c], value);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            };
+
+            // Custom fill for special Schuljahr/valid from Row 0
+            if (hRows[0]) {
+                const r0c = hRows[0].getElementsByTagName("w:tc");
+                for (let c = 0; c < r0c.length; c++) {
+                    const text = r0c[c].textContent || "";
+                    if (text.includes("im Schuljahr")) {
+                        if (r0c[c+1]) updateCellText(r0c[c+1], state.personalData.schuljahr);
+                    }
+                    if (text.includes("gültig ab")) {
+                        // The template has a complex FIELD in r0c[c+1], but we can try to fill it.
+                        if (r0c[c+1]) updateCellText(r0c[c+1], state.personalData.woche);
+                    }
+                }
+            }
+
+            fillBelowLabel("Vorname Name", state.personalData.name);
+            fillBelowLabel("Dienstbezeichnung", state.personalData.dienstbezeichnung);
+            fillBelowLabel("Geburtsdatum", state.personalData.geburtsdatum);
+            fillBelowLabel("Berufliche Fachrichtung", state.personalData.fachrichtung);
+            fillBelowLabel("Zweitfach", state.personalData.zweitfach);
+            fillBelowLabel("Privatanschrift", state.personalData.privatanschrift);
+            fillBelowLabel("Telefon", state.personalData.telefon);
+            
+            // --- Fill Table 2 (Klassleitung / Max Std) ---
+            const table2 = tables[2];
+            if (table2) {
+                const t2Rows = table2.getElementsByTagName("w:tr");
+                const t2Text = table2.textContent || "";
+                
+                // Table 2 content is dense. We'll search and replace symbols or use fixed positions if Row 0.
+                if (t2Rows[0]) {
+                    const cells = t2Rows[0].getElementsByTagName("w:tc");
+                    if (cells[0]) updateCellText(cells[0], "Klassenleitungen: " + state.personalData.klassleitung);
+                    if (cells[1]) updateCellText(cells[1], "Besonderheiten: " + state.personalData.besonderheiten);
+                    if (cells[2]) {
+                        let rowText = `Maximale Unterrichtsstunden pro Tag ___ ${state.personalData.max_std_tag} ___ an ___ ${state.personalData.max_tage_jahr} ___ Unterrichtstagen im Jahr\n` +
+                                     `Maximale Unterrichtsstunden pro Woche ___ ${state.personalData.stunden_summe} ___ in ___ ${state.personalData.max_wochen_jahr} ___ Wochen im Jahr`;
+                        updateCellText(cells[2], rowText);
+                    }
+                }
+            }
+
+            // --- Fill Table 3 (Pflichtstundenmaß / Summary) ---
+            const table3 = tables[3];
+            if (table3) {
+                const t3Rows = table3.getElementsByTagName("w:tr");
+                if (t3Rows[0]) {
+                    const c = t3Rows[0].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.upz);
+                }
+                if (t3Rows[1]) {
+                    const c = t3Rows[1].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.teilzeit_reduziert);
+                }
+                if (t3Rows[2]) {
+                    const c = t3Rows[2].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.stundenreduzierung_grund);
+                }
+                if (t3Rows[4]) {
+                    const c = t3Rows[4].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.azk_uebertrag);
+                }
+                if (t3Rows[5]) {
+                    const c = t3Rows[5].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.azk_abbau);
+                }
+                if (t3Rows[6]) {
+                    const c = t3Rows[6].getElementsByTagName("w:tc");
+                    if (c[1]) updateCellText(c[1], state.personalData.unterricht_haltend);
+                }
+            }
+        }
+
         if (!mainTable) throw new Error("Could not find timetable table in document.");
         
         const rows = mainTable.getElementsByTagName("w:tr");
-        
-        // Row 0 is header "Zeit", "Montag"...
-        // Row 1 is subheader "von-bis", "Fach", "Klasse", "Zi.Nr"...
-        // Row 2 is Hour 1
-        // Row 3 is Hour 2 ... and so on
         
         for (let hourIdx = 0; hourIdx < 10; hourIdx++) {
             const rowIdx = hourIdx + 2;
@@ -1622,36 +1908,25 @@ async function exportToWord() {
             
             const cells = row.getElementsByTagName("w:tc");
             
-            // Cell 0 is Time
-            // Cell 1 is Hour Number
-            // Cell 2-4 is Montag (Fach, Klasse, Zimmer)
-            // Cell 5-7 is Dienstag
-            // etc.
-            
             for (let dayIdx = 0; dayIdx < 5; dayIdx++) {
-                const times = getTimeForCell(dayIdx, hourIdx);
                 const entryId = state.timetable[`${dayIdx}_${hourIdx}`];
-                
-                // Update Time in the word document if it exists in the row (Cell 0)
-                // But wait, the Word template has ONE time column for all.
-                // If the user wants day-specific breaks, I have to explain that 
-                // the Word template might need manual adjustment or I can try to 
-                // put the time INTO the Fach/Klasse cells if desired.
-                // For now, I will just populate the entries.
 
                 if (!entryId) continue;
                 
                 const entry = state.timetableEntries.find(e => e.id === entryId);
                 if (!entry) continue;
                 
-                // Index mapping:
-                // Mo: Fach=2, Klasse=3, Zi=4
-                // Di: Fach=5, Klasse=6, Zi=7
                 const baseIdx = 2 + (dayIdx * 3);
                 
-                updateCellText(cells[baseIdx], entry.fach);
-                updateCellText(cells[baseIdx+1], entry.klasse);
-                updateCellText(cells[baseIdx+2], entry.zimmer);
+                if (entry.isSplit) {
+                    updateCellText(cells[baseIdx], "1/2 " + entry.fach, entry.partnerName);
+                    updateCellText(cells[baseIdx+1], entry.klasse);
+                    updateCellText(cells[baseIdx+2], entry.zimmer + "/", entry.partnerRoom);
+                } else {
+                    updateCellText(cells[baseIdx], entry.fach);
+                    updateCellText(cells[baseIdx+1], entry.klasse);
+                    updateCellText(cells[baseIdx+2], entry.zimmer);
+                }
 
                 // Try to set color
                 setCellColor(cells[baseIdx], entry.color);
@@ -1679,26 +1954,40 @@ async function exportToWord() {
     }
 }
 
-function updateCellText(cell, text) {
+function updateCellText(cell, text, secondLine = "") {
     if (!cell) return;
     const paragraphs = cell.getElementsByTagName("w:p");
     if (paragraphs.length === 0) return;
     
+    // We update the first paragraph
     const p = paragraphs[0];
-    let r = p.getElementsByTagName("w:r")[0];
     
-    if (!r) {
-        r = p.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:r");
-        p.appendChild(r);
+    // Remove all existing runs
+    const runs = p.getElementsByTagName("w:r");
+    while (runs.length > 0) {
+        p.removeChild(runs[0]);
     }
     
-    let t = r.getElementsByTagName("w:t")[0];
-    if (!t) {
-        t = p.ownerDocument.createElementNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "w:t");
-        r.appendChild(t);
+    const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+    
+    // Create new run
+    const r = p.ownerDocument.createElementNS(ns, "w:r");
+    
+    // Add first line
+    const t1 = p.ownerDocument.createElementNS(ns, "w:t");
+    t1.textContent = text || "";
+    r.appendChild(t1);
+    
+    // Add second line if provided
+    if (secondLine) {
+        const br = p.ownerDocument.createElementNS(ns, "w:br");
+        r.appendChild(br);
+        const t2 = p.ownerDocument.createElementNS(ns, "w:t");
+        t2.textContent = secondLine;
+        r.appendChild(t2);
     }
     
-    t.textContent = text || "";
+    p.appendChild(r);
 }
 
 function setCellColor(cell, hexColor) {
